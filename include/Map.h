@@ -23,6 +23,7 @@
 
 #include "MapPoint.h"
 #include "KeyFrame.h"
+#include "Frame.h"
 #include <set>
 
 #include <mutex>
@@ -49,6 +50,7 @@ public:
     int GetLastBigChangeIdx();
 
     std::vector<KeyFrame*> GetAllKeyFrames();
+    std::vector<Frame*> GetAllFrames();
     std::vector<MapPoint*> GetAllMapPoints();
     std::vector<MapPoint*> GetReferenceMapPoints();
 
@@ -69,6 +71,7 @@ public:
 protected:
     std::set<MapPoint*> mspMapPoints;
     std::set<KeyFrame*> mspKeyFrames;
+    std::set<Frame*> mspFrames;
 
     std::vector<MapPoint*> mvpReferenceMapPoints;
 
