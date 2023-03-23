@@ -140,6 +140,7 @@ std::vector<float> Converter::toQuaternion(const cv::Mat &M)
     Eigen::Quaterniond q(eigMat);
 
     std::vector<float> v(4);
+    // std::cout<<"a"<< "test"<<endl;
     v[0] = q.x();
     v[1] = q.y();
     v[2] = q.z();

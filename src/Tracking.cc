@@ -36,6 +36,7 @@
 #include<iostream>
 
 #include<mutex>
+#include <exception>
 
 
 using namespace std;
@@ -234,7 +235,9 @@ cv::Mat Tracking::GrabImageRGBD(const cv::Mat &imRGB,const cv::Mat &imD, const d
     return mCurrentFrame.mTcw.clone();
 }
 
-
+// 这个非常重要
+//
+//
 cv::Mat Tracking::GrabImageMonocular(const cv::Mat &im, const double &timestamp)
 {
     mImGray = im;
@@ -260,6 +263,57 @@ cv::Mat Tracking::GrabImageMonocular(const cv::Mat &im, const double &timestamp)
         mCurrentFrame = Frame(mImGray,timestamp,mpORBextractorLeft,mpORBVocabulary,mK,mDistCoef,mbf,mThDepth);
 
     Track();
+
+    // ofstream f;
+    // f.open(filename.c_str());
+    // f << fixed;
+
+    // for(size_t i=0; i<frame_all_pose.size(); i++)
+    // {
+ 
+    //     cv::Mat R = frame_all_pose[i]
+    //     vector<float> q = Converter::toQuaternion(R);
+    //     cv::Mat t = pKF->GetCameraCenter();
+    //     f << setprecision(6) << pKF->mTimeStamp << setprecision(7) << " " << t.at<float>(0) << " " << t.at<float>(1) << " " << t.at<float>(2)
+    //       << " " << q[0] << " " << q[1] << " " << q[2] << " " << q[3] << endl;
+
+    // }
+
+    // f.close();
+    // cout << endl << "trajectory saved!" << endl;
+
+    cv::Mat R = mCurrentFrame.mTcw ; 
+    // vector<float> q = Converter::toQuaternion(R);
+    cv::Mat t = mCurrentFrame.GetCameraCenter();
+
+    
+    stringstream ss;
+    ss<< mCurrentFrame.mTimeStamp; 
+    string name = ss.str();
+
+    if(R.dims != 0){
+        cout<<"时间序列是："<< mCurrentFrame.mTimeStamp << " "<<R.size<<endl<<R.at<float>(1,0) << " " << R.at<float>(1,1);
+
+    }
+
+//    try{
+//        cout<<"时间序列是："<< mCurrentFrame.mTimeStamp << " "<<R.size<<endl<<R.at<float>(1,0) << " " << R.at<float>(1,1);
+//    }catch(exception& e){
+//        cout<<"报错"<<e.what()<<endl;
+//        cout<<"时间序列是："<< mCurrentFrame.mTimeStamp << " "<<R.size<<endl;
+//    }
+//    cout<<"时间序列是："<< mCurrentFrame.mTimeStamp << " "<<R.size<<endl<<R.at<float>(1,0) << " " << R.at<float>(1,1);
+    //  << " " << R[0] << " " << R[1] << " " << R[2] << endl;
+
+    // ofstream f;
+    // f.open(name.c_str());
+    // f << fixed;
+    // f << setprecision(6) << mCurrentFrame.mTimeStamp << setprecision(7) << " " << t.at<float>(0) << " " << t.at<float>(1) << " " << t.at<float>(2)
+    // << " " << q[0] << " " << q[1] << " " << q[2] << " " << q[3] << endl;
+    // f.close();
+    // cout << endl << "trajectory saved!" << endl;
+
+
 
     return mCurrentFrame.mTcw.clone();
 }
@@ -489,7 +543,9 @@ void Tracking::Track()
     if(!mCurrentFrame.mTcw.empty())
     {
         cv::Mat Tcr = mCurrentFrame.mTcw*mCurrentFrame.mpReferenceKF->GetPoseInverse();
+        cout<<"tracking534测试"<<Tcr.size<<endl;
         mlRelativeFramePoses.push_back(Tcr);
+//        timeFramePoses.push_back();
         mlpReferences.push_back(mpReferenceKF);
         mlFrameTimes.push_back(mCurrentFrame.mTimeStamp);
         mlbLost.push_back(mState==LOST);
@@ -497,6 +553,7 @@ void Tracking::Track()
     else
     {
         // This can happen if tracking is lost
+        cout<<"tracking543测试"<<mlRelativeFramePoses.back().size<<endl;
         mlRelativeFramePoses.push_back(mlRelativeFramePoses.back());
         mlpReferences.push_back(mlpReferences.back());
         mlFrameTimes.push_back(mlFrameTimes.back());

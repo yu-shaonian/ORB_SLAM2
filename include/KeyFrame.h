@@ -49,7 +49,7 @@ public:
     void SetPose(const cv::Mat &Tcw);
     cv::Mat GetPose();
     cv::Mat GetPoseInverse();
-    cv::Mat GetCameraCenter();
+    cv::Mat GetCameraCenter();          
     cv::Mat GetStereoCenter();
     cv::Mat GetRotation();
     cv::Mat GetTranslation();

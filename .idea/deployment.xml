@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="PublishConfigData" remoteFilesAllowedToDisappearOnAutoupload="false">
+    <serverData>
+      <paths name="3090c (82a42355-2f47-4c2e-a9aa-db9f10cf91cc)">
+        <serverdata>
+          <mappings>
+            <mapping deploy="/mnt/nas_7/group/guojun/ORB_SLAM2" local="$PROJECT_DIR$" web="/" />
+          </mappings>
+        </serverdata>
+      </paths>
+    </serverData>
+  </component>
+</project>

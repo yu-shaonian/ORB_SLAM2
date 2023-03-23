@@ -259,6 +259,7 @@ cv::Mat System::TrackMonocular(const cv::Mat &im, const double &timestamp)
 
     cv::Mat Tcw = mpTracker->GrabImageMonocular(im,timestamp);
 
+
     unique_lock<mutex> lock2(mMutexState);
     mTrackingState = mpTracker->mState;
     mTrackedMapPoints = mpTracker->mCurrentFrame.mvpMapPoints;
@@ -415,6 +416,50 @@ void System::SaveKeyFrameTrajectoryTUM(const string &filename)
     f.close();
     cout << endl << "trajectory saved!" << endl;
 }
+
+
+
+
+//自己写的函数，实现所有位姿保存
+void System::SaveAllFrame(const string &filename)
+{
+
+    auto frame_all_pose = mpTracker->mlRelativeFramePoses;
+    auto time_frame_all_pose = mpTracker->mlFrameTimes;
+    auto ref_frame_pose = mpTracker->mlpReferences;
+    ofstream f;
+    f.open(filename.c_str());
+    f << fixed;
+    list<cv::Mat>:: iterator iter_frame ;
+    list<double>:: iterator iter_time_frame ;
+    list<KeyFrame*>:: iterator iter_ref_frame ;
+
+
+
+    iter_frame = frame_all_pose.begin();
+    iter_time_frame = time_frame_all_pose.begin();
+    iter_ref_frame = ref_frame_pose.begin();
+    for(int i = 0; i < frame_all_pose.size() ; ++i ){
+        cv::Mat R = *iter_frame;
+        cv::Mat t = (*iter_ref_frame)->GetCameraCenter();
+        vector<float> q = Converter::toQuaternion(R);
+//        cout<<"system444测试"<<R.at<float>(1,1)<<endl;
+//        f << (*iter_time_frame)  <<"  " <<R.at<float>(0,0) << " " << R.at<float>(0,1) << " " << R.at<float>(0,2) << R.at<float>(0,3)<<endl
+//                                                    << " " <<R.at<float>(1,0) << " " << R.at<float>(1,1) << " " << R.at<float>(1,2) << R.at<float>(1,3)<<endl
+//                                                    << " "  <<R.at<float>(2,0) << " " << R.at<float>(2,1) << " " << R.at<float>(2,2) << R.at<float>(2,3)<<endl
+//                                                    << " "  <<R.at<float>(3,0) << " " << R.at<float>(3,1) << " " << R.at<float>(3,2) << R.at<float>(3,3)<<endl;
+        f << setprecision(6) << (*iter_time_frame)  << setprecision(7) << " " << t.at<float>(0) << " " << t.at<float>(1) << " " << t.at<float>(2)
+          << " " << q[0] << " " << q[1] << " " << q[2] << " " << q[3] << endl;
+        iter_frame++;
+        iter_time_frame++;
+        iter_ref_frame++;
+    }
+
+    f.close();
+    cout << endl << "all frames trajectory saved!" << endl;
+}
+
+
 
 void System::SaveTrajectoryKITTI(const string &filename)
 {
