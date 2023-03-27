@@ -410,6 +410,9 @@ void System::SaveKeyFrameTrajectoryTUM(const string &filename)
         cv::Mat t = pKF->GetCameraCenter();
         f << setprecision(6) << pKF->mTimeStamp << setprecision(7) << " " << t.at<float>(0) << " " << t.at<float>(1) << " " << t.at<float>(2)
           << " " << q[0] << " " << q[1] << " " << q[2] << " " << q[3] << endl;
+//                << "R1: " << R.at<float>(0,0) << R.at<float>(0,1)<< R.at<float>(0,2) <<endl
+
+
 
     }
 
@@ -434,22 +437,42 @@ void System::SaveAllFrame(const string &filename)
     list<double>:: iterator iter_time_frame ;
     list<KeyFrame*>:: iterator iter_ref_frame ;
 
-
-
     iter_frame = frame_all_pose.begin();
     iter_time_frame = time_frame_all_pose.begin();
     iter_ref_frame = ref_frame_pose.begin();
     for(int i = 0; i < frame_all_pose.size() ; ++i ){
-        cv::Mat R = *iter_frame;
-        cv::Mat t = (*iter_ref_frame)->GetCameraCenter();
-        vector<float> q = Converter::toQuaternion(R);
-//        cout<<"system444测试"<<R.at<float>(1,1)<<endl;
-//        f << (*iter_time_frame)  <<"  " <<R.at<float>(0,0) << " " << R.at<float>(0,1) << " " << R.at<float>(0,2) << R.at<float>(0,3)<<endl
-//                                                    << " " <<R.at<float>(1,0) << " " << R.at<float>(1,1) << " " << R.at<float>(1,2) << R.at<float>(1,3)<<endl
-//                                                    << " "  <<R.at<float>(2,0) << " " << R.at<float>(2,1) << " " << R.at<float>(2,2) << R.at<float>(2,3)<<endl
-//                                                    << " "  <<R.at<float>(3,0) << " " << R.at<float>(3,1) << " " << R.at<float>(3,2) << R.at<float>(3,3)<<endl;
-        f << setprecision(6) << (*iter_time_frame)  << setprecision(7) << " " << t.at<float>(0) << " " << t.at<float>(1) << " " << t.at<float>(2)
-          << " " << q[0] << " " << q[1] << " " << q[2] << " " << q[3] << endl;
+
+        cv::Mat cv_Tcr = *iter_frame;
+        cv::Mat cv_trw = (*iter_ref_frame)->GetCameraCenter();
+        cv::Mat cv_Rrw = (*iter_ref_frame)->GetRotation();
+
+
+        Eigen::Matrix<double,3,3> Rcr = Converter::toMatrix3d(cv_Tcr);
+        Eigen::Matrix<double,3,3> Rwr = Converter::toMatrix3d(cv_Rrw).inverse();
+
+        Eigen::Matrix<double,3,1> tcr, trc;
+        Eigen::Matrix<double,3,1> twr, trw;
+
+        tcr << cv_Tcr.at<float>(0,3), cv_Tcr.at<float>(1,3), cv_Tcr.at<float>(2,3);
+        trw << cv_trw.at<float>(0), cv_trw.at<float>(1), cv_trw.at<float>(2);
+        twr = -Rwr * trw;
+
+        Eigen::Matrix<double,3,3> Rwc = Rwr * Rcr.transpose();
+        trc = -Rcr.inverse() * tcr;
+        Eigen::Matrix<double,3,1> twc = Rwr * trc + twr;
+
+
+        Eigen::Quaterniond qwc(Rwc);
+
+        std::vector<float> v(4);
+        v[0] = qwc.x();
+        v[1] = qwc.y();
+        v[2] = qwc.z();
+        v[3] = qwc.w();
+
+        f << setprecision(6) << (*iter_time_frame)  << setprecision(7) << " "
+          << twc(0,0) << " " << twc(1, 0) << " " << twc(2, 0)
+          << " " << v[0] << " " << v[1] << " " << v[2] << " " << v[3] << endl;
         iter_frame++;
         iter_time_frame++;
         iter_ref_frame++;
@@ -457,6 +480,56 @@ void System::SaveAllFrame(const string &filename)
 
     f.close();
     cout << endl << "all frames trajectory saved!" << endl;
+
+
+
+
+
+//         cv::Mat R = *iter_frame;
+//         cv::Mat t = (*iter_ref_frame)->GetCameraCenter();
+//         cv::Mat R_key = (*iter_ref_frame)->GetRotation().t();
+
+
+// //        t_world = R*t_state + t
+//         Eigen::Matrix<double,3,1> Mat_t_world;
+//         Eigen::Matrix<double,3,1> Mat_t_key;
+//         Eigen::Matrix<double,3,1> Mat_t_state;
+
+
+        // Eigen::Matrix<double,3,3> Mat_R = Converter::toMatrix3d(R);
+//         Eigen::Matrix<double,3,3> Mat_R_key = Converter::toMatrix3d(R_key);
+
+//         Mat_t_state<< R.at<float>(0,3), R.at<float>(1,3), R.at<float>(2,3);
+//         Mat_t_key<< t.at<float>(0), t.at<float>(1), t.at<float>(2);
+
+//         Mat_t_world = Mat_R_key * Mat_t_state + Mat_t_key ;
+
+//         Eigen::Matrix<double,3,3> Mat_R_world = Mat_R * Mat_R_key;
+
+
+//         Eigen::Quaterniond q(Mat_R_world);
+
+//         std::vector<float> v(4);
+//         // std::cout<<"a"<< "test"<<endl;
+//         v[0] = q.x();
+//         v[1] = q.y();
+//         v[2] = q.z();
+//         v[3] = q.w();
+
+// //        cout<<"system444测试"<<R.at<float>(1,1)<<endl;
+// //        f << (*iter_time_frame)  <<"  " <<R.at<float>(0,0) << " " << R.at<float>(0,1) << " " << R.at<float>(0,2) << R.at<float>(0,3)<<endl
+// //                                                    << " " <<R.at<float>(1,0) << " " << R.at<float>(1,1) << " " << R.at<float>(1,2) << R.at<float>(1,3)<<endl
+// //                                                    << " "  <<R.at<float>(2,0) << " " << R.at<float>(2,1) << " " << R.at<float>(2,2) << R.at<float>(2,3)<<endl
+// //                                                    << " "  <<R.at<float>(3,0) << " " << R.at<float>(3,1) << " " << R.at<float>(3,2) << R.at<float>(3,3)<<endl;
+//         f << setprecision(6) << (*iter_time_frame)  << setprecision(7) << " " << Mat_t_world(0,0) << " " << Mat_t_world(1, 0) << " " << Mat_t_world(2, 0)
+//           << " " << v[0] << " " << v[1] << " " << v[2] << " " << v[3] << endl;
+//         iter_frame++;
+//         iter_time_frame++;
+//         iter_ref_frame++;
+//     }
+
+//     f.close();
+//     cout << endl << "all frames trajectory saved!" << endl;
 }
 
 

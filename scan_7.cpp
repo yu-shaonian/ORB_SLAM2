@@ -27,12 +27,12 @@ while (1) {
         if ( frame.data == nullptr )
             break;
         // rescale because image is too large
-        cv::Mat frame_resized;
-        cv::resize(frame, frame_resized, cv::Size(640,360));
+//        cv::Mat frame_resized;
+//        cv::resize(frame, frame_resized, cv::Size(640,360));
         auto now = chrono::system_clock::now();
         auto timestamp = chrono::duration_cast<chrono::milliseconds>(now - start);
         // SLAM.TrackMonocular(frame_resized, double(timestamp.count())/1000.0);
-        SLAM.TrackMonocular(frame_resized, video_frame);
+        SLAM.TrackMonocular(frame, video_frame);
         video_frame ++;
         //这个对应秒
         cv::waitKey(30);
@@ -47,8 +47,8 @@ while (1) {
 
     cout<<"目前有效帧数："<<frame_all_pose.size()<<endl;
     // Save camera trajectory
-    SLAM.SaveKeyFrameTrajectoryTUM("scan_0.txt");
-    SLAM.SaveAllFrame("scan_all_0.txt");
+    SLAM.SaveKeyFrameTrajectoryTUM("./result/scan_0.txt");
+    SLAM.SaveAllFrame("./result/scan_all_0.txt");
 
     return 0;
 
