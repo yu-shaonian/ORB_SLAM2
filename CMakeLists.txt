@@ -111,9 +111,13 @@ add_executable(mono_euroc
 Examples/Monocular/mono_euroc.cc)
 target_link_libraries(mono_euroc ${PROJECT_NAME})
 #生成调用myvideo.mp4 可执行文件
+
 set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${PROJECT_SOURCE_DIR})
 add_executable(scan_7 scan_7.cpp)
 target_link_libraries(scan_7 ${PROJECT_NAME})
+
+add_executable(test_1 self_test/test_1.cpp)
+target_link_libraries(test_1 ${PROJECT_NAME})
 
 
 
