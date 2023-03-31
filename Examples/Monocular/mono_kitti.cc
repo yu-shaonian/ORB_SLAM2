@@ -36,21 +36,25 @@ void LoadImages(const string &strSequence, vector<string> &vstrImageFilenames,
 
 int main(int argc, char **argv)
 {
-    if(argc != 4)
-    {
-        cerr << endl << "Usage: ./mono_kitti path_to_vocabulary path_to_settings path_to_sequence" << endl;
-        return 1;
-    }
+//    if(argc != 4)
+//    {
+//        cerr << endl << "Usage: ./mono_kitti path_to_vocabulary path_to_settings path_to_sequence" << endl;
+//        return 1;
+//    }
 
     // Retrieve paths to images
     vector<string> vstrImageFilenames;
     vector<double> vTimestamps;
-    LoadImages(string(argv[3]), vstrImageFilenames, vTimestamps);
+    string argv_1 = "/mnt/nas_8/datasets/kitti_odometry/dataset/train/sequences/00";
+    string argv_2 = "/home/guojun/ORB_SLAM2_ori/Vocabulary/ORBvoc.txt";
+    string argv_3 = "/home/guojun/ORB_SLAM2_ori/Examples/Monocular/KITTI00-02.yaml";
+
+    LoadImages(argv_1, vstrImageFilenames, vTimestamps);
 
     int nImages = vstrImageFilenames.size();
 
     // Create SLAM system. It initializes all system threads and gets ready to process frames.
-    ORB_SLAM2::System SLAM(argv[1],argv[2],ORB_SLAM2::System::MONOCULAR,true);
+    ORB_SLAM2::System SLAM(argv_2,argv_3,ORB_SLAM2::System::MONOCULAR,true);
 
     // Vector for tracking time statistics
     vector<float> vTimesTrack;
@@ -119,7 +123,8 @@ int main(int argc, char **argv)
     cout << "mean tracking time: " << totaltime/nImages << endl;
 
     // Save camera trajectory
-    SLAM.SaveKeyFrameTrajectoryTUM("KeyFrameTrajectory.txt");    
+    SLAM.SaveKeyFrameTrajectoryTUM("/home/guojun/dataset/result/KeyFrameTrajectory_00.txt");
+    SLAM.SaveAllFrame("/home/guojun/dataset/result/all_frames_00.txt");
 
     return 0;
 }
@@ -127,7 +132,9 @@ int main(int argc, char **argv)
 void LoadImages(const string &strPathToSequence, vector<string> &vstrImageFilenames, vector<double> &vTimestamps)
 {
     ifstream fTimes;
+    vector<int> img_num_all;
     string strPathTimeFile = strPathToSequence + "/times.txt";
+    string img_num_path = "/home/guojun/dataset/kitti.txt";
     fTimes.open(strPathTimeFile.c_str());
     while(!fTimes.eof())
     {
@@ -143,7 +150,22 @@ void LoadImages(const string &strPathToSequence, vector<string> &vstrImageFilena
         }
     }
 
-    string strPrefixLeft = strPathToSequence + "/image_0/";
+    fTimes.open(img_num_path.c_str());
+    while(!fTimes.eof())
+    {
+        string s;
+        getline(fTimes,s);
+        if(!s.empty())
+        {
+            stringstream ss;
+            ss << s;
+            int t;
+            ss >> t;
+            img_num_all.push_back(t);
+        }
+    }
+
+    string strPrefixLeft = strPathToSequence + "/image_2/";
 
     const int nTimes = vTimestamps.size();
     vstrImageFilenames.resize(nTimes);
@@ -152,6 +174,9 @@ void LoadImages(const string &strPathToSequence, vector<string> &vstrImageFilena
     {
         stringstream ss;
         ss << setfill('0') << setw(6) << i;
+//        vstrImageFilenames[i] = strPrefixLeft + img_num_all[i] + ".png";
         vstrImageFilenames[i] = strPrefixLeft + ss.str() + ".png";
+//        cout<<(strPrefixLeft + img_num_all[i] + ".png")<<endl;
+        cout<<ss.str()<<endl;
     }
 }

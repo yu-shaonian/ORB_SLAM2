@@ -421,61 +421,90 @@ void System::SaveKeyFrameTrajectoryTUM(const string &filename)
 }
 
 
+string type2str(int type) {
+  string r;
+
+  uchar depth = type & CV_MAT_DEPTH_MASK;
+  uchar chans = 1 + (type >> CV_CN_SHIFT);
+
+  switch ( depth ) {
+    case CV_8U:  r = "8U"; break;
+    case CV_8S:  r = "8S"; break;
+    case CV_16U: r = "16U"; break;
+    case CV_16S: r = "16S"; break;
+    case CV_32S: r = "32S"; break;
+    case CV_32F: r = "32F"; break;
+    case CV_64F: r = "64F"; break;
+    default:     r = "User"; break;
+  }
+
+  r += "C";
+  r += (chans+'0');
+
+  return r;
+}
+
 
 
 //自己写的函数，实现所有位姿保存
 void System::SaveAllFrame(const string &filename)
 {
 
-    auto frame_all_pose = mpTracker->mlRelativeFramePoses;
+// version 3 --------------------
+    auto frame_all_pose = mpTracker->mlTmp;
+    auto frame_all_pose_R = mpTracker->mlTmp_R;
     auto time_frame_all_pose = mpTracker->mlFrameTimes;
-    auto ref_frame_pose = mpTracker->mlpReferences;
     ofstream f;
     f.open(filename.c_str());
     f << fixed;
     list<cv::Mat>:: iterator iter_frame ;
+    list<cv::Mat>:: iterator iter_frame_R ;
     list<double>:: iterator iter_time_frame ;
-    list<KeyFrame*>:: iterator iter_ref_frame ;
 
     iter_frame = frame_all_pose.begin();
+    iter_frame_R = frame_all_pose_R.begin();
     iter_time_frame = time_frame_all_pose.begin();
-    iter_ref_frame = ref_frame_pose.begin();
     for(int i = 0; i < frame_all_pose.size() ; ++i ){
 
-        cv::Mat cv_Tcr = *iter_frame;
-        cv::Mat cv_trw = (*iter_ref_frame)->GetCameraCenter();
-        cv::Mat cv_Rrw = (*iter_ref_frame)->GetRotation();
+        cv::Mat cv_Ow = *iter_frame;
+        cv::Mat cv_mRwc = *iter_frame_R;
+        // string ty =  type2str( cv_Ow.type() );
+        // printf("Matrix: %s %dx%d \n", ty.c_str(), cv_Ow.cols, cv_Ow.rows );
+        Eigen::Matrix<float,3,1> twc;
+        Eigen::Matrix<double,3,3> Rwc ;
+        Rwc  << cv_mRwc.at<float>(0,0), cv_mRwc.at<float>(0,1), cv_mRwc.at<float>(0,2),
+                cv_mRwc.at<float>(1,0), cv_mRwc.at<float>(1,1), cv_mRwc.at<float>(1,2),
+                cv_mRwc.at<float>(2,0), cv_mRwc.at<float>(2,1), cv_mRwc.at<float>(2,2);
+        twc << cv_Ow.at<float>(0,0), cv_Ow.at<float>(1,0), cv_Ow.at<float>(2,0);
 
+        // cv::Mat cv_Tcw = *iter_frame;
 
-        Eigen::Matrix<double,3,3> Rcr = Converter::toMatrix3d(cv_Tcr);
-        Eigen::Matrix<double,3,3> Rwr = Converter::toMatrix3d(cv_Rrw).inverse();
+        // Eigen::Matrix<double,3,3> Rcw = Converter::toMatrix3d(cv_Tcw.rowRange(0,3).colRange(0,3));
+        // Eigen::Matrix<double,3,3> Rwc = Rcw.transpose();
+        // Eigen::Matrix<double,3,1> tcw, twc;
+        // tcw << cv_Tcw.at<double>(0,3), cv_Tcw.at<double>(1,3), cv_Tcw.at<double>(2,3);
+        // twc = -Rwc * tcw;
 
-        Eigen::Matrix<double,3,1> tcr, trc;
-        Eigen::Matrix<double,3,1> twr, trw;
+         Eigen::Quaterniond qwc(Rwc);
 
-        tcr << cv_Tcr.at<float>(0,3), cv_Tcr.at<float>(1,3), cv_Tcr.at<float>(2,3);
-        trw << cv_trw.at<float>(0), cv_trw.at<float>(1), cv_trw.at<float>(2);
-        twr = -Rwr * trw;
+         std::vector<float> v(4);
+         v[0] = qwc.x();
+         v[1] = qwc.y();
+         v[2] = qwc.z();
+         v[3] = qwc.w();
 
-        Eigen::Matrix<double,3,3> Rwc = Rwr * Rcr.transpose();
-        trc = -Rcr.inverse() * tcr;
-        Eigen::Matrix<double,3,1> twc = Rwr * trc + twr;
-
-
-        Eigen::Quaterniond qwc(Rwc);
-
-        std::vector<float> v(4);
-        v[0] = qwc.x();
-        v[1] = qwc.y();
-        v[2] = qwc.z();
-        v[3] = qwc.w();
+//        std::vector<float> v(4);
+//        v[0] = 0;
+//        v[1] = 0;
+//        v[2] = 0;
+//        v[3] = 1;
 
         f << setprecision(6) << (*iter_time_frame)  << setprecision(7) << " "
           << twc(0,0) << " " << twc(1, 0) << " " << twc(2, 0)
           << " " << v[0] << " " << v[1] << " " << v[2] << " " << v[3] << endl;
         iter_frame++;
+        iter_frame_R++;
         iter_time_frame++;
-        iter_ref_frame++;
     }
 
     f.close();
@@ -483,6 +512,68 @@ void System::SaveAllFrame(const string &filename)
 
 
 
+
+
+
+
+//       version 2 ----------------------------------------
+    // auto frame_all_pose = mpTracker->mlRelativeFramePoses;
+    // auto time_frame_all_pose = mpTracker->mlFrameTimes;
+    // auto ref_frame_pose = mpTracker->mlpReferences;
+    // ofstream f;
+    // f.open(filename.c_str());
+    // f << fixed;
+    // list<cv::Mat>:: iterator iter_frame ;
+    // list<double>:: iterator iter_time_frame ;
+    // list<KeyFrame*>:: iterator iter_ref_frame ;
+
+    // iter_frame = frame_all_pose.begin();
+    // iter_time_frame = time_frame_all_pose.begin();
+    // iter_ref_frame = ref_frame_pose.begin();
+    // for(int i = 0; i < frame_all_pose.size() ; ++i ){
+
+    //     cv::Mat cv_Tcr = *iter_frame;
+    //     cv::Mat cv_trw = (*iter_ref_frame)->GetCameraCenter();
+    //     cv::Mat cv_Rrw = (*iter_ref_frame)->GetRotation();
+
+
+    //     Eigen::Matrix<float,3,3> Rcr = Converter::toMatrix3d(cv_Tcr.rowRange(0,3).colRange(0,3));
+    //     Eigen::Matrix<float,3,3> Rwr = Converter::toMatrix3d(cv_Rrw.rowRange(0,3).colRange(0,3)).inverse();
+
+    //     Eigen::Matrix<float,3,1> tcr, trc;
+    //     Eigen::Matrix<float,3,1> twr, trw;
+
+    //     tcr << cv_Tcr.at<float>(0,3), cv_Tcr.at<float>(1,3), cv_Tcr.at<float>(2,3);
+    //     trw << cv_trw.at<float>(0), cv_trw.at<float>(1), cv_trw.at<float>(2);
+    //     twr = -Rwr * trw;
+
+    //     Eigen::Matrix<float,3,3> Rwc = Rwr * Rcr.transpose();
+    //     trc = -Rcr.inverse() * tcr;
+    //     Eigen::Matrix<float,3,1> twc = Rwr * trc + twr;
+
+
+    //     Eigen::Quaterniond qwc(Rwc);
+
+    //     std::vector<float> v(4);
+    //     v[0] = qwc.x();
+    //     v[1] = qwc.y();
+    //     v[2] = qwc.z();
+    //     v[3] = qwc.w();
+
+    //     f << setprecision(6) << (*iter_time_frame)  << setprecision(7) << " "
+    //       << twc(0,0) << " " << twc(1, 0) << " " << twc(2, 0)
+    //       << " " << v[0] << " " << v[1] << " " << v[2] << " " << v[3] << endl;
+    //     iter_frame++;
+    //     iter_time_frame++;
+    //     iter_ref_frame++;
+    // }
+
+    // f.close();
+    // cout << endl << "all frames trajectory saved!" << endl;
+
+
+
+//       version 1 ----------------------------------------
 
 
 //         cv::Mat R = *iter_frame;

@@ -107,6 +107,7 @@ public:
 
     // Frame timestamp.
     double mTimeStamp;
+    int img_num;
 
     // Calibration matrix and OpenCV distortion parameters.
     cv::Mat mK;
@@ -201,6 +202,7 @@ private:
     // Assign keypoints to the grid for speed up feature matching (called in the constructor).
     void AssignFeaturesToGrid();
 
+public:
     // Rotation, translation and camera center
     cv::Mat mRcw;
     cv::Mat mtcw;

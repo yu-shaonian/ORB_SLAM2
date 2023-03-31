@@ -540,25 +540,29 @@ void Tracking::Track()
     }
 
     // Store frame pose information to retrieve the complete camera trajectory afterwards.
-    if(!mCurrentFrame.mTcw.empty())
+    if(!mCurrentFrame.mOw.empty())
+    // if(!mCurrentFrame.mTcw.empty())
     {
         cv::Mat Tcr = mCurrentFrame.mTcw*mCurrentFrame.mpReferenceKF->GetPoseInverse();
         cout<<"tracking534测试"<<Tcr.size<<endl;
         mlRelativeFramePoses.push_back(Tcr);
-//        timeFramePoses.push_back();
+        // mlTmp.push_back(mCurrentFrame.mTcw);
+        mlTmp.push_back(mCurrentFrame.mOw);
+        mlTmp_R.push_back(mCurrentFrame.mRwc);
         mlpReferences.push_back(mpReferenceKF);
         mlFrameTimes.push_back(mCurrentFrame.mTimeStamp);
         mlbLost.push_back(mState==LOST);
     }
-    else
-    {
-        // This can happen if tracking is lost
-        cout<<"tracking543测试"<<mlRelativeFramePoses.back().size<<endl;
-        mlRelativeFramePoses.push_back(mlRelativeFramePoses.back());
-        mlpReferences.push_back(mlpReferences.back());
-        mlFrameTimes.push_back(mlFrameTimes.back());
-        mlbLost.push_back(mState==LOST);
-    }
+    // else
+    // {
+    //     // This can happen if tracking is lost
+    //     cout<<"tracking543测试"<<mlRelativeFramePoses.back().size<<endl;
+    //     mlRelativeFramePoses.push_back(mlRelativeFramePoses.back());
+    //     mlTmp.push_back(mlTmp.back());
+    //     mlpReferences.push_back(mlpReferences.back());
+    //     mlFrameTimes.push_back(mlFrameTimes.back());
+    //     mlbLost.push_back(mState==LOST);
+    // }
 
 }
 
@@ -1024,7 +1028,7 @@ bool Tracking::TrackLocalMap()
     if(mCurrentFrame.mnId<mnLastRelocFrameId+mMaxFrames && mnMatchesInliers<50)
         return false;
 
-    if(mnMatchesInliers<10)
+    if(mnMatchesInliers<30)
         return false;
     else
         return true;

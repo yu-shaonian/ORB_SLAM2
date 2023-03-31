@@ -63,8 +63,6 @@ int main(int argc, char **argv)
 
 //    ifstream f_test;
     string imgPathFile = "/home/guojun/dataset/scene0000.txt";
-
-
     LoadImages(vstrImageFilenames, vTimestamps, imgPathFile);
 
     int nImages = vTimestamps.size();
@@ -76,7 +74,7 @@ int main(int argc, char **argv)
         im = cv::imread(vstrImageFilenames[ni],CV_LOAD_IMAGE_UNCHANGED);
         double tframe = vTimestamps[ni];
         SLAM.TrackMonocular(im, tframe);
-        cv::waitKey(100);
+        cv::waitKey(30);
     }
 
     // Stop all threads
