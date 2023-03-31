@@ -111,6 +111,7 @@ public:
     list<int> timeFramePoses;
     list<KeyFrame*> mlpReferences;
     list<double> mlFrameTimes;
+    list<long unsigned int> mlFrameNums;
     list<bool> mlbLost;
 
     // True if local mapping is deactivated and we are performing only localization

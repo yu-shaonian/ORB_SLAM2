@@ -551,6 +551,7 @@ void Tracking::Track()
         mlTmp_R.push_back(mCurrentFrame.mRwc);
         mlpReferences.push_back(mpReferenceKF);
         mlFrameTimes.push_back(mCurrentFrame.mTimeStamp);
+        mlFrameNums.push_back(mCurrentFrame.mnId);
         mlbLost.push_back(mState==LOST);
     }
     // else

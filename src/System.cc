@@ -453,17 +453,18 @@ void System::SaveAllFrame(const string &filename)
 // version 3 --------------------
     auto frame_all_pose = mpTracker->mlTmp;
     auto frame_all_pose_R = mpTracker->mlTmp_R;
-    auto time_frame_all_pose = mpTracker->mlFrameTimes;
+//    auto time_frame_all_pose = mpTracker->mlFrameTimes;
+    auto num_frame_all_pose = mpTracker->mlFrameNums;
     ofstream f;
     f.open(filename.c_str());
     f << fixed;
     list<cv::Mat>:: iterator iter_frame ;
     list<cv::Mat>:: iterator iter_frame_R ;
-    list<double>:: iterator iter_time_frame ;
+    list<long unsigned int>:: iterator iter_num_frame ;
 
     iter_frame = frame_all_pose.begin();
     iter_frame_R = frame_all_pose_R.begin();
-    iter_time_frame = time_frame_all_pose.begin();
+    iter_num_frame = num_frame_all_pose.begin();
     for(int i = 0; i < frame_all_pose.size() ; ++i ){
 
         cv::Mat cv_Ow = *iter_frame;
@@ -499,12 +500,12 @@ void System::SaveAllFrame(const string &filename)
 //        v[2] = 0;
 //        v[3] = 1;
 
-        f << setprecision(6) << (*iter_time_frame)  << setprecision(7) << " "
+        f << setprecision(6) << (*iter_num_frame)  << setprecision(7) << " "
           << twc(0,0) << " " << twc(1, 0) << " " << twc(2, 0)
           << " " << v[0] << " " << v[1] << " " << v[2] << " " << v[3] << endl;
         iter_frame++;
         iter_frame_R++;
-        iter_time_frame++;
+        iter_num_frame++;
     }
 
     f.close();
