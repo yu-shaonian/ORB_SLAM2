@@ -45,7 +45,7 @@ int main(int argc, char **argv)
     // Retrieve paths to images
     vector<string> vstrImageFilenames;
     vector<double> vTimestamps;
-    string argv_1 = "/mnt/nas_8/datasets/kitti_odometry/dataset/train/sequences/04";
+    string argv_1 = "/mnt/nas_8/datasets/kitti_odometry/dataset/train/sequences/00";
     string argv_2 = "/home/guojun/ORB_SLAM2_ori/Vocabulary/ORBvoc.txt";
     string argv_3 = "/home/guojun/ORB_SLAM2_ori/Examples/Monocular/KITTI00-02.yaml";
 
@@ -123,8 +123,8 @@ int main(int argc, char **argv)
     cout << "mean tracking time: " << totaltime/nImages << endl;
 
     // Save camera trajectory
-    SLAM.SaveKeyFrameTrajectoryTUM("/home/guojun/dataset/result/KeyFrameTrajectory_04.txt");
-    SLAM.SaveAllFrame("/home/guojun/dataset/result/all_frames_04.txt");
+    SLAM.SaveKeyFrameTrajectoryTUM("/home/guojun/dataset/result/KeyFrameTrajectory_00.txt");
+    SLAM.SaveAllFrame("/home/guojun/dataset/result/all_frames_00.txt");
 
     return 0;
 }

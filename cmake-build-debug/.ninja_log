@@ -30,3 +30,5 @@
 7267	9496	1680249738515808783	CMakeFiles/ORB_SLAM2.dir/src/MapDrawer.cc.o	124150011f135e68
 1	4748	1680249806279808102	CMakeFiles/mono_kitti.dir/Examples/Monocular/mono_kitti.cc.o	c5c7f4e5d9c6def2
 4748	4958	1680249806491808100	/home/guojun/ORB_SLAM2_ori/Examples/Monocular/mono_kitti	6cde1390fd4f66e3
+2	4823	1680272580963932273	CMakeFiles/mono_kitti.dir/Examples/Monocular/mono_kitti.cc.o	c5c7f4e5d9c6def2
+4823	5061	1680272581199932271	/home/guojun/ORB_SLAM2_ori/Examples/Monocular/mono_kitti	6cde1390fd4f66e3
